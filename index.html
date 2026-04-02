@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,174 +7,229 @@
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #080808; --card: #121212; --brd: #222; --acc: #00ffa3; --txt: #fff; --dim: #808080; --red: #ff3b69; }
-        body { background: var(--bg); color: var(--txt); font-family: 'Roboto Mono', monospace; margin: 0; padding: 0; font-size: 14px; overflow: hidden; }
+        :root { 
+            --bg: #0a0a0a; --card: #141414; --brd: #222; 
+            --acc: #00c896; --txt: #e0e0e0; --dim: #707070; --red: #e53935;
+        }
+        body { background: var(--bg); color: var(--txt); font-family: 'Roboto Mono', monospace; margin: 0; padding: 0; font-size: 13px; overflow: hidden; }
         
         /* Header */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--brd); height: 60px; box-sizing: border-box; }
-        #active-pair-name { font-weight: bold; color: var(--acc); font-size: 16px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--brd); height: 55px; box-sizing: border-box; }
+        #pair-label { font-weight: bold; color: var(--acc); font-size: 16px; }
 
-        /* Pages */
-        .page { display: none; height: calc(100vh - 130px); overflow-y: auto; }
-        .page.active { display: block; }
+        /* Main Layout */
+        .main-container { display: flex; height: calc(100vh - 115px); }
+        
+        /* Vertical Asset List */
+        .asset-list { width: 90px; border-right: 1px solid var(--brd); overflow-y: auto; background: #000; scrollbar-width: none; }
+        .asset-list::-webkit-scrollbar { display: none; }
+        .asset-item { padding: 12px 5px; text-align: center; border-bottom: 1px solid #111; cursor: pointer; }
+        .asset-item b { display: block; color: var(--acc); font-size: 11px; }
+        .asset-item span { font-size: 9px; color: var(--dim); }
 
-        /* Market Table */
-        .m-table { width: 100%; border-collapse: collapse; }
-        .m-table tr { border-bottom: 1px solid #151515; cursor: pointer; transition: 0.2s; }
-        .m-table td { padding: 15px; }
-        .price-up { color: var(--acc); }
-        .price-down { color: var(--red); }
+        /* Trade Content */
+        .trade-content { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        #tv_chart { width: 100%; height: 260px; flex-shrink: 0; border-bottom: 1px solid var(--brd); }
 
         /* Trade Form */
-        #tv_chart { width: 100%; height: 280px; border-bottom: 1px solid var(--brd); }
-        .order-area { padding: 15px; background: var(--card); }
-        .input-box { width: 100%; background: #000; border: 1px solid var(--brd); color: var(--acc); padding: 12px; border-radius: 4px; margin-bottom: 10px; font-family: inherit; box-sizing: border-box; }
-        .trade-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .t-btn { padding: 15px; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; }
+        .order-form { padding: 15px; background: var(--card); }
+        .type-tabs { display: flex; background: #000; border-radius: 4px; margin-bottom: 15px; padding: 2px; }
+        .t-tab { flex: 1; padding: 8px; text-align: center; font-size: 11px; cursor: pointer; border-radius: 3px; color: var(--dim); transition: 0.2s; }
+        .t-tab.active { background: var(--brd); color: var(--txt); }
 
-        /* Wallet Card */
-        .wallet-hero { padding: 35px 20px; text-align: center; background: var(--card); margin: 15px; border-radius: 12px; border: 1px solid var(--brd); }
-        .balance-val { font-size: 32px; font-weight: bold; margin: 10px 0; color: var(--txt); }
+        .field { margin-bottom: 12px; }
+        .field label { font-size: 9px; color: var(--dim); display: block; margin-bottom: 4px; text-transform: uppercase; }
+        .hl-input { width: 100%; background: #000; border: 1px solid var(--brd); color: var(--acc); padding: 12px; border-radius: 4px; font-family: inherit; box-sizing: border-box; outline: none; }
+        .hl-input:disabled { opacity: 0.5; color: var(--dim); }
+
+        .btn-trade { width: 100%; padding: 16px; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; margin-top: 5px; transition: 0.3s; }
+        .btn-trade:disabled { background: #222 !important; color: #555 !important; cursor: not-allowed; }
+
+        /* Pages */
+        .page { display: none; width: 100%; height: 100%; }
+        .page.active { display: block; }
 
         /* Navigation */
-        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid var(--brd); background: var(--bg); z-index: 1000; }
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid var(--brd); background: var(--bg); height: 60px; box-sizing: border-box; }
         .nav-item { color: var(--dim); font-size: 10px; text-align: center; cursor: pointer; font-weight: bold; }
         .nav-item.active { color: var(--acc); }
 
-        #ton-connect button { background-color: var(--acc) !important; color: #000 !important; }
+        #ton-connect button { background-color: var(--acc) !important; color: #000 !important; font-size: 11px !important; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div id="active-pair-name">BTC/USDT</div>
+        <div id="pair-label">BTC/USDT</div>
         <div id="ton-connect"></div>
     </div>
 
-    <div id="page-home" class="page active">
-        <div style="padding:15px; color:var(--dim); font-size:11px;">LIVE MARKET DATA</div>
-        <table class="m-table" id="coin-list"></table>
-    </div>
+    <div id="page-trade" class="page active">
+        <div class="main-container">
+            <div class="asset-list" id="coin-sidebar"></div>
 
-    <div id="page-trade" class="page">
-        <div id="tv_chart"></div>
-        <div class="order-area">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:11px">
-                <span style="color:var(--dim)">Available:</span>
-                <span class="sync-balance" style="color:var(--acc)">0.00 USDT</span>
-            </div>
-            <input type="number" class="input-box" id="trade-price" placeholder="Price">
-            <input type="number" class="input-box" id="trade-qty" placeholder="Amount">
-            <div class="trade-btns">
-                <button class="t-btn" style="background:var(--acc); color:#000" onclick="tg.showAlert('Long Order Placed')">Long</button>
-                <button class="t-btn" style="background:var(--red); color:#fff" onclick="tg.showAlert('Short Order Placed')">Short</button>
+            <div class="trade-content">
+                <div id="tv_chart"></div>
+                <div class="order-form">
+                    <div class="type-tabs">
+                        <div class="t-tab active" onclick="setMode('LIMIT', this)">LIMIT</div>
+                        <div class="t-tab" onclick="setMode('MARKET', this)">MARKET</div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:11px">
+                        <span style="color:var(--dim)">Balance:</span>
+                        <span id="user-bal" style="color:var(--acc)">0.00 USDT</span>
+                    </div>
+
+                    <div class="field">
+                        <label>Price (USDT)</label>
+                        <input type="number" class="hl-input" id="in-price" placeholder="0.00" oninput="validateOrder()">
+                    </div>
+                    <div class="field">
+                        <label>Amount</label>
+                        <input type="number" class="hl-input" id="in-qty" placeholder="0.00" oninput="validateOrder()">
+                    </div>
+
+                    <button class="btn-trade" id="main-act-btn" style="background:var(--acc); color:#000" onclick="alert('Order Success')">
+                        BUY / LONG
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
     <div id="page-wallet" class="page">
-        <div class="wallet-hero">
-            <div style="color:var(--dim); font-size:12px">TOTAL EQUITY</div>
-            <div class="balance-val sync-balance">$0.00</div>
-            <div id="wallet-addr" style="font-size:10px; color:var(--dim)">Not connected</div>
+        <div style="padding:50px 20px; text-align:center">
+            <div style="color:var(--dim)">TOTAL ASSETS</div>
+            <h1 id="bal-display" style="font-size:36px; margin:15px 0">$0.00</h1>
+            <div id="wallet-status" style="font-size:11px; color:var(--dim)">Disconnected</div>
         </div>
-        <div style="padding:15px; font-size:12px; color:var(--dim)">MY ASSETS</div>
-        <div style="padding:0 20px">
-            <div style="display:flex; justify-content:space-between; padding:15px 0; border-bottom:1px solid #151515">
-                <span>USDT</span><b class="sync-balance">$0.00</b>
-            </div>
+    </div>
+
+    <div id="page-settings" class="page">
+        <div style="padding:20px">
+            <h3 style="border-bottom:1px solid var(--brd); padding-bottom:10px">Settings</h3>
+            <div style="padding:15px 0; display:flex; justify-content:space-between"><span>Currency</span><b>USD</b></div>
+            <div style="padding:15px 0; display:flex; justify-content:space-between"><span>Language</span><b>EN</b></div>
+            <div style="padding:15px 0; color:var(--red); font-weight:bold" onclick="tg.close()">Exit App</div>
         </div>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active" onclick="navTo('page-home', this)">🏠<br>Markets</div>
-        <div class="nav-item" onclick="navTo('page-trade', this)">📈<br>Trade</div>
+        <div class="nav-item active" onclick="navTo('page-trade', this)">📈<br>Trade</div>
         <div class="nav-item" onclick="navTo('page-wallet', this)">💼<br>Wallet</div>
+        <div class="nav-item" onclick="navTo('page-settings', this)">⚙️<br>Settings</div>
     </nav>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
-        let currentSymbol = "BTCUSDT";
-        let globalBalance = 0.00;
+        let currentSymbol = "BTCUSDT", currentPrice = 0, balance = 0, orderMode = "LIMIT";
+        
+        // Список 100 монет (сокращено для примера, легко расширить)
+        const coinNames = ["BTC","ETH","SOL","TON","NOT","XRP","DOGE","ADA","AVAX","DOT","LINK","TRX","MATIC","LTC","NEAR","SUI","PEPE","WIF","BONK","SHIB","UNI","ARB","OP","TIA","APT","FET","RNDR","FIL","LDO","INJ","STX","KAS","ORDI","JUP","STRK","PYTH","GALA","DYDX","HBAR","VET","ALGO","FLOW","AXS","SAND","MANA","EOS","NEO","ZEC","DASH","AAVE","CAKE","CRV","SNX","MKR","COMP","LRC","IMX","CHZ","EGLD","KAVA","THETA","BCH","ETC","XMR","XLM","RUNE","BEAM","SEI","SATS","MNT"];
 
-        // --- TON CONNECT LOGIC ---
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://ton-connect.github.io/demo-dapp-with-react/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
         });
 
-        tonConnectUI.onStatusChange(wallet => {
-            if (wallet) {
-                globalBalance = 1420.50; // Имитация баланса из кошелька
-                document.getElementById('wallet-addr').innerText = wallet.account.address.slice(0,10) + "...";
-            } else {
-                globalBalance = 0.00;
-                document.getElementById('wallet-addr').innerText = "Not connected";
-            }
-            updateAllBalances();
+        tonConnectUI.onStatusChange(w => {
+            balance = w ? 1000.00 : 0.00; // Имитация баланса $1000 при входе
+            document.getElementById('wallet-status').innerText = w ? "Connected" : "Disconnected";
+            updateUI();
         });
 
-        function updateAllBalances() {
-            document.querySelectorAll('.sync-balance').forEach(el => {
-                el.innerText = globalBalance > 0 ? `$${globalBalance.toFixed(2)}` : "0.00 USDT";
-            });
-        }
-
-        // --- NAVIGATION ---
-        function navTo(pageId, el) {
+        function navTo(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            document.getElementById(id).classList.add('active');
             el.classList.add('active');
-            if(pageId === 'page-trade') loadTradingView(currentSymbol);
         }
 
-        // --- MARKET & WEBSOCKET ---
-        const coins = ["BTC", "ETH", "SOL", "TON", "NOT", "XRP", "DOGE"];
-        
-        function initMarkets() {
-            const container = document.getElementById('coin-list');
-            coins.forEach(c => {
-                const tr = document.createElement('tr');
-                tr.id = `pair-${c}`;
-                tr.onclick = () => {
-                    currentSymbol = c + "USDT";
-                    document.getElementById('active-pair-name').innerText = c + "/USDT";
-                    navTo('page-trade', document.querySelectorAll('.nav-item')[1]);
-                };
-                tr.innerHTML = `<td><b>${c}</b>/USDT</td><td class="price" style="text-align:right">---</td><td class="pct" style="text-align:right">0%</td>`;
-                container.appendChild(tr);
-            });
+        function setMode(mode, el) {
+            orderMode = mode;
+            document.querySelectorAll('.t-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            const pIn = document.getElementById('in-price');
+            if(mode === 'MARKET') {
+                pIn.value = currentPrice;
+                pIn.disabled = true;
+            } else {
+                pIn.disabled = false;
+            }
+            validateOrder();
+        }
 
-            // WebSocket Binance
-            const streams = coins.map(c => c.toLowerCase() + 'usdt@ticker').join('/');
+        function validateOrder() {
+            const p = parseFloat(document.getElementById('in-price').value) || 0;
+            const q = parseFloat(document.getElementById('in-qty').value) || 0;
+            const total = p * q;
+            const btn = document.getElementById('main-act-btn');
+
+            if(total > balance) {
+                btn.disabled = true;
+                btn.innerText = "INSUFFICIENT FUNDS";
+                btn.style.color = "var(--red)";
+            } else {
+                btn.disabled = (total <= 0);
+                btn.innerText = "BUY / LONG";
+                btn.style.color = "#000";
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('user-bal').innerText = balance.toFixed(2) + " USDT";
+            document.getElementById('bal-display').innerText = "$" + balance.toFixed(2);
+            validateOrder();
+        }
+
+        function initSidebar() {
+            const sidebar = document.getElementById('coin-sidebar');
+            coinNames.forEach(c => {
+                const item = document.createElement('div');
+                item.className = 'asset-item';
+                item.innerHTML = `<b>${c}</b><span id="price-${c}">---</span>`;
+                item.onclick = () => {
+                    currentSymbol = c + "USDT";
+                    document.getElementById('pair-label').innerText = c + "/USDT";
+                    loadChart(currentSymbol);
+                };
+                sidebar.appendChild(item);
+            });
+        }
+
+        function loadChart(s) {
+            new TradingView.widget({
+                "autosize": true, "symbol": "BINANCE:" + s, "interval": "60", "theme": "dark",
+                "container_id": "tv_chart", "hide_top_toolbar": true, "backgroundColor": "#0a0a0a"
+            });
+        }
+
+        function connectWS() {
+            const streams = coinNames.slice(0, 30).map(c => c.toLowerCase() + 'usdt@ticker').join('/');
             const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streams}`);
             ws.onmessage = (e) => {
                 const d = JSON.parse(e.data);
-                const s = d.s.replace('USDT','');
-                const row = document.getElementById(`pair-${s}`);
-                if(row) {
-                    const price = parseFloat(d.c).toFixed(2);
-                    const pct = parseFloat(d.P).toFixed(2);
-                    row.querySelector('.price').innerText = `$${price}`;
-                    const pEl = row.querySelector('.pct');
-                    pEl.innerText = `${pct}%`;
-                    pEl.className = `pct ${pct >= 0 ? 'price-up' : 'price-down'}`;
+                const sym = d.s.replace('USDT','');
+                const price = parseFloat(d.c).toFixed(2);
+                const el = document.getElementById(`price-${sym}`);
+                if(el) el.innerText = price;
+                
+                if(d.s === currentSymbol) {
+                    currentPrice = price;
+                    if(orderMode === 'MARKET') {
+                        document.getElementById('in-price').value = currentPrice;
+                        validateOrder();
+                    }
                 }
             };
         }
 
-        // --- CHART ---
-        function loadTradingView(s) {
-            new TradingView.widget({
-                "autosize": true, "symbol": "BINANCE:" + s, "interval": "60", "theme": "dark",
-                "container_id": "tv_chart", "hide_top_toolbar": true, "backgroundColor": "#080808"
-            });
-        }
-
-        initMarkets();
-        updateAllBalances();
+        initSidebar();
+        connectWS();
+        loadChart(currentSymbol);
+        updateUI();
     </script>
 </body>
 </html>
