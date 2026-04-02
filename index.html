@@ -11,113 +11,75 @@
             --bg: #0b0b0b;
             --card-bg: #141414;
             --border: #262626;
-            --accent: #00ffa3; /* Зеленый Hyperliquid */
+            --accent: #00ffa3;
             --text-main: #e5e5e5;
             --text-dim: #808080;
             --red: #ff3b69;
+        }
+
+        /* Светлая тема */
+        body.light-theme {
+            --bg: #ffffff;
+            --card-bg: #f5f5f5;
+            --border: #e0e0e0;
+            --accent: #00a36c;
+            --text-main: #1a1a1a;
+            --text-dim: #666666;
         }
 
         body {
             background-color: var(--bg);
             color: var(--text-main);
             font-family: 'Roboto Mono', monospace;
-            margin: 0;
-            padding: 0;
-            font-size: 13px;
-            user-select: none;
-            overflow: hidden; /* Фиксируем экран */
+            margin: 0; padding: 0; font-size: 13px;
+            transition: background 0.3s, color 0.3s;
         }
 
-        /* Header */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 16px;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg);
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 16px; border-bottom: 1px solid var(--border);
+            background: var(--bg); position: sticky; top: 0; z-index: 100;
         }
 
-        .logo { font-weight: 700; color: var(--accent); letter-spacing: -1px; }
-
-        /* Вкладки контента */
-        .page { display: none; height: calc(100vh - 120px); animation: fadeIn 0.2s ease; overflow-y: auto; }
+        .page { display: none; height: calc(100vh - 110px); overflow-y: auto; animation: fadeIn 0.2s; }
         .page.active { display: block; }
 
-        /* Элементы Trade (График) */
-        #tradingview_widget {
-            width: 100%;
-            height: 60%; /* График занимает 60% экрана */
-            border-bottom: 1px solid var(--border);
-        }
+        #tradingview_widget { width: 100%; height: 55%; border-bottom: 1px solid var(--border); }
 
-        .trade-controls {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .price-up { color: var(--accent); }
-        .price-down { color: var(--red); }
-
-        /* Portfolio Styles */
-        .stat-label { color: var(--text-dim); font-size: 11px; margin-bottom: 4px; padding: 16px 16px 0 16px;}
-        .stat-value { font-size: 18px; font-weight: bold; margin-bottom: 15px; padding: 0 16px;}
-        .portfolio-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            padding: 12px;
-            border-radius: 4px;
-            margin: 16px;
-        }
-
-        /* Кнопки в стиле HL */
         .hl-btn {
-            width: 100%;
-            background: var(--accent);
-            color: black;
-            border: none;
-            padding: 12px;
-            font-family: 'Roboto Mono', monospace;
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 2px;
+            width: 100%; background: var(--accent); color: black; border: none;
+            padding: 12px; font-family: 'Roboto Mono', monospace; font-weight: bold;
+            border-radius: 2px; margin-bottom: 8px; cursor: pointer;
         }
 
-        .hl-btn-outline {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-main);
+        .settings-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px; border-bottom: 1px solid var(--border); background: var(--card-bg);
+            margin: 10px 16px; border-radius: 4px;
         }
 
-        /* Bottom Nav */
+        /* Переключатель темы (Switch) */
+        .switch {
+            position: relative; display: inline-block; width: 40px; height: 20px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #444; transition: .4s; border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
         .nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: var(--bg);
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 100;
+            position: fixed; bottom: 0; width: 100%; background: var(--bg);
+            border-top: 1px solid var(--border); display: flex;
+            justify-content: space-around; padding: 10px 0; z-index: 100;
         }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-dim);
-            text-decoration: none;
-            font-size: 10px;
-            transition: 0.2s;
-            cursor: pointer;
-        }
-
+        .nav-item { color: var(--text-dim); font-size: 10px; text-align: center; cursor: pointer; }
         .nav-item.active { color: var(--accent); }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -126,83 +88,54 @@
 <body>
 
     <div class="header">
-        <div class="logo">VERTEX_HL</div>
-        <div id="ton-connect"></div>
-    </div>
+        <div style="font-weight:700; color:var(--accent)">VERTEX_HL</div>
+        <div id="ton-connect"></div> </div>
 
-    <div id="trade" class="page active" style="overflow: hidden;">
+    <div id="trade" class="page active">
         <div id="tradingview_widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-        <script type="text/javascript">
-        new TradingView.widget(
-        {
-          "autosize": true,
-          "symbol": "BINANCE:BTCUSDT",
-          "interval": "60",
-          "timezone": "Etc/UTC",
-          "theme": "dark",
-          "style": "1",
-          "locale": "ru",
-          "toolbar_bg": "#0b0b0b",
-          "enable_publishing": false,
-          "hide_top_toolbar": true, // Прячем лишние кнопки
-          "hide_legend": true, // Скрываем легенду
-          "save_image": false,
-          "container_id": "tradingview_widget",
-          "backgroundColor": "#0b0b0b", // HL Style
-          "gridColor": "#141414",
-          "studies": []
-        }
-        );
-        </script>
-        <div class="trade-controls">
-            <button class="hl-btn" onclick="tg.showAlert('Покупка LONG: Не подключено API Bybit')">BUY / LONG</button>
-            <button class="hl-btn" style="background: var(--red);" onclick="tg.showAlert('Продажа SHORT: Не подключено API Bybit')">SELL / SHORT</button>
-        </div>
-    </div>
-
-    <div id="portfolio" class="page">
-        <div class="stat-label">TOTAL EQUITY</div>
-        <div class="stat-value" id="balance-usdt">$0.00</div>
-        
-        <div class="stat-label">ACTIVE POSITIONS</div>
-        <div class="portfolio-card" style="text-align: center; color: var(--text-dim);">
-            No active positions
-        </div>
-    </div>
-
-    <div id="ai" class="page">
-        <div class="stat-label">AI AGENT STATUS</div>
-        <div style="color: var(--accent); margin-bottom: 20px; padding: 0 16px;">● ONLINE</div>
-        <p style="padding: 0 16px;">Получите анализ рынка на основе алгоритмов Hyperliquid.</p>
         <div style="padding: 16px;">
-            <button class="hl-btn hl-btn-outline" onclick="tg.sendData('get_ai_signal')">GENERATE PREDICTION</button>
+            <button class="hl-btn" onclick="tg.showAlert('Order Executed (Demo)')">BUY / LONG</button>
+            <button class="hl-btn" style="background:var(--red)" onclick="tg.showAlert('Order Executed (Demo)')">SELL / SHORT</button>
         </div>
     </div>
 
     <div id="settings" class="page">
-        <div class="stat-label">ACCOUNT SETTINGS</div>
-        <div class="portfolio-card">
-            <p>API Bybit: Connected</p>
-            <p>Language: English</p>
-            <p>Theme: Hyperdark</p>
+        <div style="color:var(--text-dim); padding: 16px 16px 5px 16px; font-size:11px">PREFERENCES</div>
+        
+        <div class="settings-row">
+            <span>Dark Mode</span>
+            <label class="switch">
+                <input type="checkbox" id="theme-toggle" checked onchange="toggleTheme()">
+                <span class="slider"></span>
+            </label>
         </div>
-        <div style="padding: 16px;">
-            <button class="hl-btn hl-btn-outline" onclick="tg.close()">LOGOUT</button>
+
+        <div class="settings-row" onclick="window.open('https://t.me/твой_ник_саппорта')">
+            <span>Support</span>
+            <span style="color:var(--accent)">→</span>
+        </div>
+
+        <div class="settings-row">
+            <span>Version</span>
+            <span style="color:var(--text-dim)">2.5.0-BETA</span>
         </div>
     </div>
 
     <nav class="nav">
         <div class="nav-item active" onclick="switchTab('trade', this)"><div>📈</div>TRADE</div>
-        <div class="nav-item" onclick="switchTab('portfolio', this)"><div>💼</div>PORTFOLIO</div>
-        <div class="nav-item" onclick="switchTab('ai', this)"><div>🤖</div>AI</div>
         <div class="nav-item" onclick="switchTab('settings', this)"><div>⚙️</div>SETTINGS</div>
     </nav>
 
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        tg.headerColor = '#0b0b0b';
+
+        // Инициализация TON Connect
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://raw.githubusercontent.com/ton-connect/demo-dapp-with-react/master/public/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        });
 
         // Переключение вкладок
         function switchTab(id, el) {
@@ -212,11 +145,34 @@
             el.classList.add('active');
         }
 
-        // Подключение TON Wallet
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://raw.githubusercontent.com/ton-connect/demo-dapp-with-react/master/public/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect'
-        });
+        // Переключение темы
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            tg.setHeaderColor(isLight ? '#ffffff' : '#0b0b0b');
+            tg.setBackgroundColor(isLight ? '#ffffff' : '#0b0b0b');
+            
+            // Пересоздаем график с новой темой
+            renderWidget(isLight ? 'light' : 'dark');
+        }
+
+        function renderWidget(theme) {
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "BINANCE:BTCUSDT",
+                "interval": "60",
+                "theme": theme,
+                "style": "1",
+                "locale": "ru",
+                "container_id": "tradingview_widget",
+                "hide_top_toolbar": true,
+                "backgroundColor": theme === 'dark' ? "#0b0b0b" : "#ffffff",
+                "gridColor": theme === 'dark' ? "#141414" : "#f0f0f0"
+            });
+        }
+
+        // Первый запуск графика
+        renderWidget('dark');
     </script>
 </body>
 </html>
