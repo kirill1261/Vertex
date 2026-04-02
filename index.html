@@ -2,132 +2,221 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --main-color: #00ff00; --bg-color: #050505; --card-bg: #121212; --text-gray: #888; }
-        body { background-color: var(--bg-color); color: white; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding-bottom: 80px; overflow-x: hidden; }
-        
-        .header { padding: 15px; position: sticky; top: 0; background: var(--bg-color); border-bottom: 1px solid #222; z-index: 10; }
-        .search-box { background: #1a1a1a; border: none; color: white; padding: 10px; width: 90%; border-radius: 8px; margin-top: 10px; }
-
-        /* Список пар */
-        .market-list { padding: 10px; }
-        .crypto-row { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 12px 15px; background: var(--card-bg); margin-bottom: 5px; 
-            border-radius: 10px; transition: 0.2s;
+        :root {
+            --bg: #0b0b0b;
+            --card-bg: #141414;
+            --border: #262626;
+            --accent: #00ffa3; /* Зеленый Hyperliquid */
+            --text-main: #e5e5e5;
+            --text-dim: #808080;
+            --red: #ff3b69;
         }
-        .crypto-info { display: flex; flex-direction: column; }
-        .symbol { font-weight: bold; font-size: 16px; }
-        .vol { font-size: 11px; color: var(--text-gray); }
-        .price-info { text-align: right; }
-        .price { font-family: monospace; font-size: 16px; transition: color 0.3s; }
-        
-        /* Цветовая индикация изменения цены */
-        .up { color: #00ff00; }
-        .down { color: #ff4444; }
 
-        /* Навигация */
-        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #0f0f0f; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #222; }
-        .nav-item { color: var(--text-gray); font-size: 12px; cursor: pointer; text-align: center; }
-        .nav-item.active { color: var(--main-color); }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Roboto Mono', monospace;
+            margin: 0;
+            padding: 0;
+            font-size: 13px;
+            user-select: none;
+            overflow: hidden; /* Фиксируем экран */
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo { font-weight: 700; color: var(--accent); letter-spacing: -1px; }
+
+        /* Вкладки контента */
+        .page { display: none; height: calc(100vh - 120px); animation: fadeIn 0.2s ease; overflow-y: auto; }
+        .page.active { display: block; }
+
+        /* Элементы Trade (График) */
+        #tradingview_widget {
+            width: 100%;
+            height: 60%; /* График занимает 60% экрана */
+            border-bottom: 1px solid var(--border);
+        }
+
+        .trade-controls {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .price-up { color: var(--accent); }
+        .price-down { color: var(--red); }
+
+        /* Portfolio Styles */
+        .stat-label { color: var(--text-dim); font-size: 11px; margin-bottom: 4px; padding: 16px 16px 0 16px;}
+        .stat-value { font-size: 18px; font-weight: bold; margin-bottom: 15px; padding: 0 16px;}
+        .portfolio-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 4px;
+            margin: 16px;
+        }
+
+        /* Кнопки в стиле HL */
+        .hl-btn {
+            width: 100%;
+            background: var(--accent);
+            color: black;
+            border: none;
+            padding: 12px;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+
+        .hl-btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        /* Bottom Nav */
+        .nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: var(--bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 10px;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item.active { color: var(--accent); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div style="color: var(--main-color); font-weight: bold; letter-spacing: 1px;">VERTEX TERMINAL</div>
-    <input type="text" class="search-box" placeholder="Поиск монет (например, BTC)..." oninput="filterCoins(this.value)">
-</div>
-
-<div id="market" class="market-list">
+    <div class="header">
+        <div class="logo">VERTEX_HL</div>
+        <div id="ton-connect"></div>
     </div>
 
-<nav class="nav-bar">
-    <div class="nav-item active">📊 Рынок</div>
-    <div class="nav-item" onclick="tg.showAlert('Раздел в разработке')">🔄 Торги</div>
-    <div class="nav-item" onclick="tg.showAlert('Требуется подписка')">🤖 ИИ</div>
-</nav>
-
-<script>
-    let tg = window.Telegram.WebApp;
-    tg.expand();
-
-    let coinsData = {}; // Объект для хранения цен
-    let symbols = []; // Список 100 символов
-
-    // 1. Получаем ТОП-100 пар по объему через REST API в начале
-    async function initMarket() {
-        try {
-            const response = await fetch('https://api.binance.com/api/v3/ticker/24hr');
-            const data = await response.json();
-            
-            // Фильтруем только пары к USDT и сортируем по объему (quoteVolume)
-            const top100 = data
-                .filter(i => i.symbol.endsWith('USDT'))
-                .sort((a, b) => parseFloat(b.quoteVolume) - parseFloat(a.quoteVolume))
-                .slice(0, 100);
-
-            symbols = top100.map(i => i.symbol.toLowerCase());
-            
-            // Отрисовываем каркас
-            const container = document.getElementById('market');
-            container.innerHTML = top100.map(coin => `
-                <div class="crypto-row" id="row-${coin.symbol}">
-                    <div class="crypto-info">
-                        <span class="symbol">${coin.symbol.replace('USDT', '')} <small style="color:#555">/USDT</small></span>
-                        <span class="vol">Vol: ${Math.round(coin.quoteVolume / 1000000)}M</span>
-                    </div>
-                    <div class="price-info">
-                        <div class="price" id="price-${coin.symbol}">$${parseFloat(coin.lastPrice).toFixed(2)}</div>
-                    </div>
-                </div>
-            `).join('');
-
-            startWebSocket();
-        } catch (e) {
-            console.error("Ошибка инициализации рынка:", e);
+    <div id="trade" class="page active" style="overflow: hidden;">
+        <div id="tradingview_widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+        <script type="text/javascript">
+        new TradingView.widget(
+        {
+          "autosize": true,
+          "symbol": "BINANCE:BTCUSDT",
+          "interval": "60",
+          "timezone": "Etc/UTC",
+          "theme": "dark",
+          "style": "1",
+          "locale": "ru",
+          "toolbar_bg": "#0b0b0b",
+          "enable_publishing": false,
+          "hide_top_toolbar": true, // Прячем лишние кнопки
+          "hide_legend": true, // Скрываем легенду
+          "save_image": false,
+          "container_id": "tradingview_widget",
+          "backgroundColor": "#0b0b0b", // HL Style
+          "gridColor": "#141414",
+          "studies": []
         }
-    }
+        );
+        </script>
+        <div class="trade-controls">
+            <button class="hl-btn" onclick="tg.showAlert('Покупка LONG: Не подключено API Bybit')">BUY / LONG</button>
+            <button class="hl-btn" style="background: var(--red);" onclick="tg.showAlert('Продажа SHORT: Не подключено API Bybit')">SELL / SHORT</button>
+        </div>
+    </div>
 
-    // 2. Подключаем WebSocket для живого обновления цен
-    function startWebSocket() {
-        // Создаем поток для всех 100 пар сразу
-        const streamNames = symbols.map(s => `${s}@ticker`).join('/');
-        const socket = new WebSocket(`wss://stream.binance.com:9443/ws/${streamNames}`);
+    <div id="portfolio" class="page">
+        <div class="stat-label">TOTAL EQUITY</div>
+        <div class="stat-value" id="balance-usdt">$0.00</div>
+        
+        <div class="stat-label">ACTIVE POSITIONS</div>
+        <div class="portfolio-card" style="text-align: center; color: var(--text-dim);">
+            No active positions
+        </div>
+    </div>
 
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            const symbol = data.s;
-            const price = parseFloat(data.c).toFixed(symbol.includes('SHIB') ? 6 : 2);
-            const priceChange = parseFloat(data.p);
-            
-            const priceEl = document.getElementById(`price-${symbol}`);
-            if (priceEl) {
-                // Эффект вспышки при изменении
-                const oldPrice = parseFloat(priceEl.innerText.replace('$', ''));
-                priceEl.innerText = `$${price}`;
-                
-                if (parseFloat(price) > oldPrice) {
-                    priceEl.className = 'price up';
-                } else if (parseFloat(price) < oldPrice) {
-                    priceEl.className = 'price down';
-                }
-            }
-        };
-    }
+    <div id="ai" class="page">
+        <div class="stat-label">AI AGENT STATUS</div>
+        <div style="color: var(--accent); margin-bottom: 20px; padding: 0 16px;">● ONLINE</div>
+        <p style="padding: 0 16px;">Получите анализ рынка на основе алгоритмов Hyperliquid.</p>
+        <div style="padding: 16px;">
+            <button class="hl-btn hl-btn-outline" onclick="tg.sendData('get_ai_signal')">GENERATE PREDICTION</button>
+        </div>
+    </div>
 
-    // Поиск по списку
-    function filterCoins(query) {
-        const rows = document.querySelectorAll('.crypto-row');
-        rows.forEach(row => {
-            const symbol = row.id.replace('row-', '');
-            row.style.display = symbol.includes(query.toUpperCase()) ? 'flex' : 'none';
+    <div id="settings" class="page">
+        <div class="stat-label">ACCOUNT SETTINGS</div>
+        <div class="portfolio-card">
+            <p>API Bybit: Connected</p>
+            <p>Language: English</p>
+            <p>Theme: Hyperdark</p>
+        </div>
+        <div style="padding: 16px;">
+            <button class="hl-btn hl-btn-outline" onclick="tg.close()">LOGOUT</button>
+        </div>
+    </div>
+
+    <nav class="nav">
+        <div class="nav-item active" onclick="switchTab('trade', this)"><div>📈</div>TRADE</div>
+        <div class="nav-item" onclick="switchTab('portfolio', this)"><div>💼</div>PORTFOLIO</div>
+        <div class="nav-item" onclick="switchTab('ai', this)"><div>🤖</div>AI</div>
+        <div class="nav-item" onclick="switchTab('settings', this)"><div>⚙️</div>SETTINGS</div>
+    </nav>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.headerColor = '#0b0b0b';
+
+        // Переключение вкладок
+        function switchTab(id, el) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        // Подключение TON Wallet
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://raw.githubusercontent.com/ton-connect/demo-dapp-with-react/master/public/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
         });
-    }
-
-    initMarket();
-</script>
+    </script>
 </body>
 </html>
