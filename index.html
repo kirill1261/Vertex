@@ -5,291 +5,305 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root { 
-            --bg: #050505; --card: #111; --brd: #222; --acc: #00c896; 
-            --red: #ff3b69; --txt: #fff; --dim: #888; --nav: #000;
+            --bg: #0b0e11; --card: #161a1e; --brd: #2b3139; --acc: #02c076; 
+            --red: #f84960; --txt: #eaecef; --dim: #848e9c; --nav: #161a1e;
         }
         .light-theme {
-            --bg: #ffffff; --card: #f9f9f9; --brd: #e0e0e0; --acc: #00a37b; 
-            --red: #d32f2f; --txt: #000; --dim: #666; --nav: #f0f0f0;
+            --bg: #ffffff; --card: #f5f5f5; --brd: #e0e0e0; --acc: #03a66d; 
+            --red: #cf304a; --txt: #000000; --dim: #707a8a; --nav: #ffffff;
         }
-        body { background: var(--bg); color: var(--txt); font-family: 'Roboto Mono', monospace; margin: 0; padding: 0; overflow: hidden; transition: 0.2s; font-size: 12px; }
+        body { background: var(--bg); color: var(--txt); font-family: 'Inter', sans-serif; margin: 0; padding: 0; overflow: hidden; transition: 0.2s; -webkit-user-select: none; }
         
-        /* Nav */
+        /* Bottom Nav */
         .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 65px; background: var(--nav); display: flex; border-top: 1px solid var(--brd); z-index: 100; }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 9px; color: var(--dim); cursor: pointer; }
-        .nav-item.active { color: var(--acc); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--dim); cursor: pointer; }
+        .nav-item.active { color: var(--txt); font-weight: bold; }
+        .nav-item i { font-size: 20px; margin-bottom: 2px; }
 
         .page { display: none; height: calc(100vh - 65px); overflow-y: auto; width: 100%; }
         .page.active { display: block; }
 
-        /* Order Book Style */
-        .order-book { width: 80px; font-size: 9px; display: flex; flex-direction: column; border-right: 1px solid var(--brd); padding: 5px; }
-        .ob-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
-        .ob-ask { color: var(--red); } .ob-bid { color: var(--acc); }
-
-        /* Trade UI */
-        .trade-header { padding: 8px; border-bottom: 1px solid var(--brd); display: flex; justify-content: space-between; }
-        .t-select, .t-input { background: #000; color: var(--txt); border: 1px solid var(--brd); padding: 8px; border-radius: 4px; width: 100%; box-sizing: border-box; outline: none; }
-        .trade-layout { display: flex; height: 100%; }
-        .trade-form { flex: 1; padding: 10px; overflow-y: auto; }
-        
-        .side-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
-        .side-btn { flex: 1; padding: 10px; border-radius: 4px; text-align: center; cursor: pointer; border: 1px solid var(--brd); font-weight: bold; font-size: 10px; }
-        .side-btn.active-long { background: var(--acc); color: #000; border-color: var(--acc); }
-        .side-btn.active-short { background: var(--red); color: #fff; border-color: var(--red); }
-
-        /* Position Block */
-        .pos-block { background: var(--card); border: 1px solid var(--brd); padding: 12px; margin-top: 15px; border-radius: 6px; }
-        .pnl { font-size: 16px; font-weight: bold; margin: 5px 0; }
-
         /* Home/Market */
-        .market-item { padding: 15px; border-bottom: 1px solid var(--brd); display: flex; justify-content: space-between; align-items: center; }
+        .market-header { padding: 15px; font-size: 18px; font-weight: bold; border-bottom: 1px solid var(--brd); }
+        .market-item { padding: 12px 15px; border-bottom: 1px solid var(--brd); display: flex; justify-content: space-between; align-items: center; }
+        .m-change { padding: 4px 8px; border-radius: 4px; font-weight: bold; min-width: 60px; text-align: center; font-size: 12px; }
+
+        /* Trade Page Layout (from Screenshot) */
+        .trade-top-bar { display: flex; align-items: center; padding: 10px; gap: 10px; border-bottom: 1px solid var(--brd); }
+        .asset-btn { display: flex; align-items: center; gap: 5px; font-weight: bold; cursor: pointer; }
+        
+        .main-trade-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 10px; padding: 10px; }
+        
+        /* Order Form */
+        .oc-tabs { display: flex; background: var(--brd); border-radius: 4px; margin-bottom: 12px; }
+        .oc-btn { flex: 1; padding: 8px; text-align: center; font-size: 12px; border-radius: 4px; cursor: pointer; color: var(--dim); }
+        .oc-btn.active { background: #323840; color: var(--txt); }
+
+        .form-select, .form-input { width: 100%; background: var(--brd); border: none; color: var(--txt); padding: 10px; border-radius: 4px; margin-bottom: 8px; box-sizing: border-box; font-size: 13px; }
+        .avail-text { font-size: 11px; color: var(--dim); margin-bottom: 5px; display: flex; justify-content: space-between; }
+        
+        .buy-btn { width: 100%; padding: 12px; background: var(--acc); color: white; border: none; border-radius: 4px; font-weight: bold; margin-bottom: 5px; cursor: pointer; }
+        .sell-btn { width: 100%; padding: 12px; background: var(--red); color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+
+        /* Order Book (Right Side) */
+        .ob-container { font-size: 11px; }
+        .ob-header { display: flex; justify-content: space-between; color: var(--dim); margin-bottom: 5px; }
+        .ob-row { display: flex; justify-content: space-between; padding: 2px 0; }
+        .ob-ask { color: var(--red); }
+        .ob-bid { color: var(--acc); }
+        .ob-mid { font-size: 14px; font-weight: bold; text-align: center; padding: 8px 0; border-top: 1px solid var(--brd); border-bottom: 1px solid var(--brd); margin: 5px 0; }
+
+        /* Position Info */
+        .position-card { background: var(--card); margin-top: 15px; padding: 12px; border-radius: 4px; border: 1px solid var(--brd); }
+        .pnl-text { font-size: 18px; font-weight: bold; margin: 5px 0; }
     </style>
 </head>
-<body class="dark-theme">
+<body>
 
-    <div id="page-home" class="page active">
-        <div style="padding:15px; border-bottom:1px solid var(--brd); display:flex; justify-content:space-between">
-            <b>Market Hot 100</b>
-            <span style="color:var(--dim); font-size:10px">Live WebSocket</span>
-        </div>
+    <div id="p-home" class="page active">
+        <div class="market-header">Markets</div>
         <div id="market-list"></div>
     </div>
 
-    <div id="page-trade" class="page">
-        <div class="trade-header">
-            <select id="asset-picker" class="t-select" style="width:120px" onchange="changeAsset(this.value)"></select>
-            <div id="price-now" style="font-weight:bold; color:var(--acc)">0.00</div>
+    <div id="p-trade" class="page">
+        <div class="trade-top-bar">
+            <div class="asset-btn" onclick="toggleAssetPicker()">
+                <span id="active-pair">BTCUSDT</span> <span>▼</span>
+            </div>
+            <span id="active-price-change" style="color: var(--red); font-size: 12px;">-4.01%</span>
         </div>
-        
-        <div id="tv_chart" style="height:180px; width:100%"></div>
 
-        <div class="trade-layout">
-            <div class="order-book" id="order-book-ui"></div>
+        <div id="tv_chart" style="height: 150px; width: 100%;"></div>
 
+        <div class="main-trade-grid">
             <div class="trade-form">
-                <div class="side-tabs">
-                    <div id="tab-long" class="side-btn active-long" onclick="setSide('LONG')">LONG</div>
-                    <div id="tab-short" class="side-btn" onclick="setSide('SHORT')">SHORT</div>
+                <div class="oc-tabs">
+                    <div class="oc-btn active" id="mode-open" onclick="setMode('OPEN')">Open</div>
+                    <div class="oc-btn" id="mode-close" onclick="setMode('CLOSE')">Close</div>
                 </div>
 
-                <div style="margin-bottom:10px">
-                    <label style="font-size:9px; color:var(--dim)">ORDER TYPE</label>
-                    <select id="order-mode" class="t-select" onchange="toggleLimitUI()">
-                        <option value="MARKET">Market Order</option>
-                        <option value="LIMIT">Limit Order</option>
-                    </select>
+                <select id="order-type" class="form-select" onchange="updateUIForOrderType()">
+                    <option value="MARKET">Market</option>
+                    <option value="LIMIT">Limit</option>
+                </select>
+
+                <div id="limit-price-wrap" style="display:none">
+                    <input type="number" id="limit-price" class="form-input" placeholder="Price">
                 </div>
 
-                <div id="limit-box" style="display:none; margin-bottom:10px">
-                    <label style="font-size:9px; color:var(--dim)">LIMIT PRICE</label>
-                    <input type="number" id="limit-price" class="t-input" placeholder="0.00">
+                <div class="avail-text">
+                    <span>Avbl</span>
+                    <span><b class="user-bal">1000.00</b> USDT</span>
+                </div>
+                <input type="number" id="trade-amount" class="form-input" placeholder="Amount (USDT)">
+
+                <div style="display:flex; gap:5px">
+                    <input type="number" id="tp-price" class="form-input" placeholder="TP">
+                    <input type="number" id="sl-price" class="form-input" placeholder="SL">
                 </div>
 
-                <div style="margin-bottom:10px">
-                    <label style="font-size:9px; color:var(--dim)">AMOUNT (Bal: $<span class="user-bal">1000</span>)</label>
-                    <input type="number" id="trade-amount" class="t-input" placeholder="0.00">
+                <button class="buy-btn" onclick="executeOrder('LONG')">Buy / Long</button>
+                <button class="sell-btn" onclick="executeOrder('SHORT')">Sell / Short</button>
+            </div>
+
+            <div class="ob-container">
+                <div class="ob-header"><span>Price</span><span>Qty</span></div>
+                <div id="ob-asks"></div>
+                <div class="ob-mid" id="mid-price">65,799.20</div>
+                <div id="ob-bids"></div>
+            </div>
+        </div>
+
+        <div id="active-pos-box" style="padding:10px; display:none">
+            <div class="position-card">
+                <div style="display:flex; justify-content:space-between; font-size:12px">
+                    <b id="pos-sym-side">BTCUSDT Long 10x</b>
+                    <span id="pos-close-x" onclick="closePosition()" style="cursor:pointer">✕</span>
                 </div>
-
-                <div style="display:flex; gap:5px; margin-bottom:10px">
-                    <div style="flex:1">
-                        <label style="font-size:9px; color:var(--dim)">TP</label>
-                        <input type="number" id="tp-price" class="t-input" placeholder="Take Profit">
-                    </div>
-                    <div style="flex:1">
-                        <label style="font-size:9px; color:var(--dim)">SL</label>
-                        <input type="number" id="sl-price" class="t-input" placeholder="Stop Loss">
-                    </div>
-                </div>
-
-                <button id="main-exec-btn" onclick="executeTrade()" class="side-btn active-long" style="width:100%; border:none; padding:15px">OPEN POSITION</button>
-
-                <div id="pos-ui" class="pos-block" style="display:none">
-                    <div style="display:flex; justify-content:space-between; font-size:10px">
-                        <span id="pos-info">BTC/USDT LONG</span>
-                        <span id="pos-entry">Entry: 0</span>
-                    </div>
-                    <div id="pos-pnl" class="pnl">+0.00%</div>
-                    <button onclick="closePos()" style="width:100%; background:var(--red); color:#fff; border:none; border-radius:4px; padding:5px">CLOSE</button>
+                <div id="pos-pnl" class="pnl-text" style="color:var(--acc)">+0.00%</div>
+                <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--dim)">
+                    <span>Size: $<span id="pos-size">0</span></span>
+                    <span>Entry: <span id="pos-entry">0</span></span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="page-portfolio" class="page">
-        <div id="wallet-not-connected" style="padding:100px 20px; text-align:center">
-            <div id="ton-connect"></div>
-            <p style="color:var(--dim); margin-top:20px">Please connect your wallet to see balance</p>
+    <div id="p-portfolio" class="page">
+        <div id="ton-auth" style="padding:100px 20px; text-align:center">
+            <div id="ton-connect" style="display:inline-block"></div>
         </div>
-        <div id="wallet-connected" style="display:none; padding:30px 20px; text-align:center">
-            <p style="color:var(--dim)">Equity Balance</p>
-            <h1 style="font-size:32px">$<span class="user-bal">1000.00</span></h1>
-            <div style="background:var(--card); padding:15px; border-radius:10px; margin-top:20px; text-align:left">
-                <div style="display:flex; justify-content:space-between; margin-bottom:10px"><span>Asset</span><span>Balance</span></div>
-                <div style="display:flex; justify-content:space-between"><b>USDT</b><b>1000.00</b></div>
-            </div>
+        <div id="ton-wallet" style="display:none; padding:20px; text-align:center">
+            <div style="color:var(--dim); font-size:14px">Total Assets</div>
+            <h1 style="font-size:36px; margin:10px 0">$<span class="user-bal">1000.00</span></h1>
         </div>
     </div>
 
-    <div id="page-settings" class="page">
-        <div style="padding:15px; font-weight:bold; color:var(--acc)">Application Settings</div>
-        <div class="market-item" onclick="toggleTheme()"><span>Theme Mode</span><b id="theme-name">Dark 🌙</b></div>
-        <div class="market-item">
-            <span>Language</span>
-            <select class="t-select" style="width:100px">
-                <option>English</option>
-                <option>Русский</option>
-                <option>Українська</option>
-            </select>
+    <div id="p-settings" class="page">
+        <div style="padding:20px">
+            <h3 style="color:var(--acc)">Settings</h3>
+            <div class="market-item" onclick="toggleTheme()"><span>Theme Mode</span><b id="theme-label">Dark 🌙</b></div>
+            <div class="market-item"><span>Language</span><b>English (EN)</b></div>
+            <div class="market-item" style="color:var(--red)" onclick="tg.close()"><span>Log Out</span><b>✕</b></div>
         </div>
-        <div class="market-item" style="color:var(--red)" onclick="tg.showAlert('Logged Out')"><span>Log Out</span><b>✕</b></div>
-        <div class="market-item" onclick="tg.showAlert('Select Account...')"><span>Switch Account</span><b>⇄</b></div>
     </div>
 
     <nav class="bottom-nav">
-        <div class="nav-item active" onclick="nav('page-home', this)">🏠<br>Home</div>
-        <div class="nav-item" onclick="nav('page-trade', this)">📊<br>Trade</div>
-        <div class="nav-item" onclick="nav('page-portfolio', this)">💼<br>Portfolio</div>
-        <div class="nav-item" onclick="nav('page-settings', this)">⚙️<br>Settings</div>
+        <div class="nav-item active" onclick="nav('p-home', this)">🏠<br>Home</div>
+        <div class="nav-item" onclick="nav('p-trade', this)">📊<br>Trade</div>
+        <div class="nav-item" onclick="nav('p-portfolio', this)">💼<br>Portfolio</div>
+        <div class="nav-item" onclick="nav('p-settings', this)">⚙️<br>Settings</div>
     </nav>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         const tg = window.Telegram.WebApp; tg.expand();
-        let balance = 1000.00, curPrice = 0, curSym = "BTCUSDT", tradeSide = "LONG", activePos = null;
-        const assets = ["BTC","ETH","SOL","TON","XRP","DOGE","ADA","AVAX","DOT","MATIC","LINK","SHIB","LTC","NEAR","SUI","PEPE","TIA","ARB","OP","APT"];
+        let balance = 1000.00, curPrice = 0, curSym = "BTCUSDT", activePos = null, openClose = "OPEN";
+        const assets = ["BTC","ETH","SOL","TON","BNB","XRP","DOGE","ADA","AVAX","DOT","MATIC","LINK","SHIB","LTC","NEAR","SUI","PEPE","FET","RNDR","SATS"];
 
-        // Connect Wallet Logic
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://ton-connect.github.io/demo-dapp-with-react/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
         });
+
         tonConnectUI.onStatusChange(w => {
-            document.getElementById('wallet-not-connected').style.display = w ? 'none' : 'block';
-            document.getElementById('wallet-connected').style.display = w ? 'block' : 'none';
+            document.getElementById('ton-auth').style.display = w ? 'none' : 'block';
+            document.getElementById('ton-wallet').style.display = w ? 'block' : 'none';
         });
 
         function nav(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active'); el.classList.add('active');
-            if(id === 'page-trade') loadChart(curSym);
+            if(id === 'p-trade') loadChart(curSym);
         }
 
-        function toggleLimitUI() {
-            document.getElementById('limit-box').style.display = (document.getElementById('order-mode').value === 'LIMIT') ? 'block' : 'none';
+        function setMode(m) {
+            openClose = m;
+            document.getElementById('mode-open').classList.toggle('active', m==='OPEN');
+            document.getElementById('mode-close').classList.toggle('active', m==='CLOSE');
         }
 
-        function setSide(s) {
-            tradeSide = s;
-            document.getElementById('tab-long').className = 'side-btn' + (s==='LONG'?' active-long':'');
-            document.getElementById('tab-short').className = 'side-btn' + (s==='SHORT'?' active-short':'');
-            document.getElementById('main-exec-btn').className = 'side-btn' + (s==='LONG'?' active-long':' active-short');
+        function updateUIForOrderType() {
+            const type = document.getElementById('order-type').value;
+            document.getElementById('limit-price-wrap').style.display = type === 'LIMIT' ? 'block' : 'none';
         }
 
-        function executeTrade() {
+        function executeOrder(side) {
             const amt = parseFloat(document.getElementById('trade-amount').value) || 0;
-            const price = (document.getElementById('order-mode').value === 'MARKET') ? curPrice : parseFloat(document.getElementById('limit-price').value);
+            const price = document.getElementById('order-type').value === 'MARKET' ? curPrice : parseFloat(document.getElementById('limit-price').value);
 
-            if(amt > balance) return tg.showAlert("INSUFFICIENT FUNDS");
-            if(amt <= 0) return tg.showAlert("Invalid amount");
+            if(amt > balance) return tg.showPopup({message:"INSUFFICIENT FUNDS"});
+            if(amt <= 0) return;
 
             activePos = {
-                sym: curSym, entry: price, side: tradeSide, size: amt,
+                sym: curSym, side: side, entry: price, size: amt,
                 tp: parseFloat(document.getElementById('tp-price').value) || null,
                 sl: parseFloat(document.getElementById('sl-price').value) || null
             };
 
             balance -= amt;
-            updateUI();
-            document.getElementById('pos-ui').style.display = 'block';
-            document.getElementById('pos-info').innerText = `${curSym} ${tradeSide}`;
-            document.getElementById('pos-entry').innerText = `Entry: ${price}`;
+            updateBalance();
+            document.getElementById('active-pos-box').style.display = 'block';
+            document.getElementById('pos-sym-side').innerText = `${curSym} ${side} 10x`;
+            document.getElementById('pos-entry').innerText = price;
+            document.getElementById('pos-size').innerText = amt;
         }
 
-        function closePos() {
-            balance += activePos.size; // Демо: возвращаем тело депозита
+        function closePosition() {
+            if(!activePos) return;
+            balance += activePos.size;
             activePos = null;
-            updateUI();
-            document.getElementById('pos-ui').style.display = 'none';
+            updateBalance();
+            document.getElementById('active-pos-box').style.display = 'none';
         }
 
-        function updateUI() {
+        function updateBalance() {
             document.querySelectorAll('.user-bal').forEach(el => el.innerText = balance.toFixed(2));
         }
 
         function loadChart(s) {
             new TradingView.widget({
-                "autosize": true, "symbol": "BINANCE:" + s, "interval": "1", "theme": "dark", "container_id": "tv_chart", "hide_top_toolbar": true, "backgroundColor": "#050505"
+                "autosize": true, "symbol": "BINANCE:" + s, "interval": "1", "theme": "dark", "container_id": "tv_chart", "hide_top_toolbar": true, "backgroundColor": "#0b0e11"
             });
         }
 
         function toggleTheme() {
-            const b = document.body;
-            b.className = b.className === 'dark-theme' ? 'light-theme' : 'dark-theme';
-            document.getElementById('theme-name').innerText = b.className === 'dark-theme' ? 'Dark 🌙' : 'Light ☀️';
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            document.getElementById('theme-label').innerText = isLight ? "Light ☀️" : "Dark 🌙";
         }
 
-        function changeAsset(a) { curSym = a + "USDT"; loadChart(curSym); }
-
-        function init() {
+        function initMarket() {
             const list = document.getElementById('market-list');
-            const pick = document.getElementById('asset-picker');
             assets.forEach(a => {
-                const item = document.createElement('div');
-                item.className = 'market-item';
-                item.innerHTML = `<b>${a}/USDT</b><span id="m-${a}">---</span>`;
-                item.onclick = () => { curSym = a + "USDT"; nav('page-trade', document.querySelectorAll('.nav-item')[1]); };
-                list.appendChild(item);
-
-                const opt = document.createElement('option');
-                opt.value = a; opt.innerText = a + "/USDT";
-                pick.appendChild(opt);
+                const row = document.createElement('div');
+                row.className = 'market-item';
+                row.innerHTML = `<div><b>${a}</b><div style="font-size:10px; color:var(--dim)">/USDT</div></div>
+                                 <div style="text-align:right">
+                                    <div id="price-${a}" style="font-weight:bold">---</div>
+                                    <div class="m-change" id="ch-${a}" style="background:var(--acc); color:#fff">+0.00%</div>
+                                 </div>`;
+                row.onclick = () => { curSym = a + "USDT"; document.getElementById('active-pair').innerText = curSym; nav('p-trade', document.querySelectorAll('.nav-item')[1]); };
+                list.appendChild(row);
             });
 
-            // WebSocket
             const ws = new WebSocket('wss://stream.binance.com:9443/ws');
             ws.onopen = () => ws.send(JSON.stringify({method:"SUBSCRIBE", params: assets.map(a => a.toLowerCase()+"usdt@ticker"), id:1}));
             ws.onmessage = (e) => {
                 const d = JSON.parse(e.data);
                 if(!d.s) return;
-                const p = parseFloat(d.c).toFixed(2);
                 const s = d.s.replace('USDT','');
-                if(document.getElementById(`m-${s}`)) document.getElementById(`m-${s}`).innerText = p;
+                const p = parseFloat(d.c).toFixed(2);
+                const ch = parseFloat(d.P).toFixed(2);
+                
+                if(document.getElementById(`price-${s}`)) document.getElementById(`price-${s}`).innerText = p;
+                if(document.getElementById(`ch-${s}`)) {
+                    const el = document.getElementById(`ch-${s}`);
+                    el.innerText = (ch >= 0 ? '+' : '') + ch + "%";
+                    el.style.background = ch >= 0 ? 'var(--acc)' : 'var(--red)';
+                }
 
                 if(d.s === curSym) {
                     curPrice = p;
-                    document.getElementById('price-now').innerText = p;
-                    renderOB(p);
-                    if(activePos) {
-                        const diff = activePos.side === 'LONG' ? (p - activePos.entry) : (activePos.entry - p);
-                        const pnlVal = ((diff / activePos.entry) * 100).toFixed(2);
-                        const ui = document.getElementById('pos-pnl');
-                        ui.innerText = (pnlVal >= 0 ? '+' : '') + pnlVal + "%";
-                        ui.style.color = pnlVal >= 0 ? 'var(--acc)' : 'var(--red)';
-                        
-                        // TP/SL Logic
-                        if(activePos.tp && ((activePos.side === 'LONG' && p >= activePos.tp) || (activePos.side === 'SHORT' && p <= activePos.tp))) closePos();
-                        if(activePos.sl && ((activePos.side === 'LONG' && p <= activePos.sl) || (activePos.side === 'SHORT' && p >= activePos.sl))) closePos();
-                    }
+                    document.getElementById('mid-price').innerText = p;
+                    document.getElementById('active-price-change').innerText = (ch >= 0 ? '+' : '') + ch + "%";
+                    document.getElementById('active-price-change').style.color = ch >= 0 ? 'var(--acc)' : 'var(--red)';
+                    updateOrderBook(p);
+                    if(activePos) updatePnL(p);
                 }
             };
         }
 
-        function renderOB(price) {
-            const container = document.getElementById('order-book-ui');
-            let html = '';
-            for(let i=0; i<5; i++) html += `<div class="ob-row ob-ask"><span>${(price * 1.001).toFixed(2)}</span><span>${(Math.random()*2).toFixed(1)}</span></div>`;
-            html += `<div style="text-align:center; padding:5px 0; border-y: 1px solid #333">${price}</div>`;
-            for(let i=0; i<5; i++) html += `<div class="ob-row ob-bid"><span>${(price * 0.999).toFixed(2)}</span><span>${(Math.random()*2).toFixed(1)}</span></div>`;
-            container.innerHTML = html;
+        function updatePnL(p) {
+            const diff = activePos.side === 'LONG' ? (p - activePos.entry) : (activePos.entry - p);
+            const pnl = ((diff / activePos.entry) * 100).toFixed(2);
+            const el = document.getElementById('pos-pnl');
+            el.innerText = (pnl >= 0 ? '+' : '') + pnl + "%";
+            el.style.color = pnl >= 0 ? 'var(--acc)' : 'var(--red)';
+            
+            // TP/SL
+            if(activePos.tp && ((activePos.side==='LONG' && p>=activePos.tp) || (activePos.side==='SHORT' && p<=activePos.tp))) closePosition();
+            if(activePos.sl && ((activePos.side==='LONG' && p<=activePos.sl) || (activePos.side==='SHORT' && p>=activePos.sl))) closePosition();
         }
 
-        init();
-        updateUI();
+        function updateOrderBook(p) {
+            const askBox = document.getElementById('ob-asks');
+            const bidBox = document.getElementById('ob-bids');
+            let askH = '', bidH = '';
+            for(let i=0; i<6; i++) {
+                askH = `<div class="ob-row ob-ask"><span>${(p*1.0005 + i*0.1).toFixed(2)}</span><span>${(Math.random()).toFixed(3)}</span></div>` + askH;
+                bidH += `<div class="ob-row ob-bid"><span>${(p*0.9995 - i*0.1).toFixed(2)}</span><span>${(Math.random()).toFixed(3)}</span></div>`;
+            }
+            askBox.innerHTML = askH;
+            bidBox.innerHTML = bidH;
+        }
+
+        initMarket();
+        updateBalance();
     </script>
 </body>
 </html>
