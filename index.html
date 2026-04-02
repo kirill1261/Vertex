@@ -8,171 +8,181 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0b0b0b;
-            --card-bg: #141414;
-            --border: #262626;
-            --accent: #00ffa3;
-            --text-main: #e5e5e5;
-            --text-dim: #808080;
-            --red: #ff3b69;
+            --bg: #0b0b0b; --card: #141414; --brd: #262626;
+            --acc: #00ffa3; --txt: #e5e5e5; --dim: #808080; --red: #ff3b69;
         }
-
-        /* Светлая тема */
-        body.light-theme {
-            --bg: #ffffff;
-            --card-bg: #f5f5f5;
-            --border: #e0e0e0;
-            --accent: #00a36c;
-            --text-main: #1a1a1a;
-            --text-dim: #666666;
+        body.light {
+            --bg: #ffffff; --card: #f5f5f5; --brd: #e0e0e0;
+            --acc: #00a36c; --txt: #1a1a1a; --dim: #666666;
         }
-
         body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: 'Roboto Mono', monospace;
-            margin: 0; padding: 0; font-size: 13px;
-            transition: background 0.3s, color 0.3s;
+            background: var(--bg); color: var(--txt);
+            font-family: 'Roboto Mono', monospace; margin: 0; padding: 0;
+            font-size: 12px; overflow: hidden; transition: 0.3s;
         }
 
+        /* Header */
         .header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 16px; border-bottom: 1px solid var(--border);
-            background: var(--bg); position: sticky; top: 0; z-index: 100;
+            padding: 8px 12px; border-bottom: 1px solid var(--brd); background: var(--bg);
+        }
+        .asset-select { 
+            background: var(--card); border: 1px solid var(--brd); 
+            color: var(--acc); padding: 4px 8px; border-radius: 4px; font-weight: bold;
         }
 
-        .page { display: none; height: calc(100vh - 110px); overflow-y: auto; animation: fadeIn 0.2s; }
+        /* Layout */
+        .page { display: none; height: calc(100vh - 100px); overflow-y: auto; }
         .page.active { display: block; }
 
-        #tradingview_widget { width: 100%; height: 55%; border-bottom: 1px solid var(--border); }
+        /* Trade Section */
+        #tv_chart { width: 100%; height: 45vh; border-bottom: 1px solid var(--brd); }
+        .orderbook { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--brd); }
+        .ob-side { background: var(--bg); padding: 8px; }
+        .ob-row { display: flex; justify-content: space-between; margin-bottom: 3px; font-size: 10px; }
 
-        .hl-btn {
-            width: 100%; background: var(--accent); color: black; border: none;
-            padding: 12px; font-family: 'Roboto Mono', monospace; font-weight: bold;
-            border-radius: 2px; margin-bottom: 8px; cursor: pointer;
+        /* Buttons */
+        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px; }
+        .hl-btn { 
+            padding: 12px; border: none; font-weight: bold; border-radius: 2px;
+            font-family: inherit; cursor: pointer;
         }
 
-        .settings-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px; border-bottom: 1px solid var(--border); background: var(--card-bg);
-            margin: 10px 16px; border-radius: 4px;
-        }
-
-        /* Переключатель темы (Switch) */
-        .switch {
-            position: relative; display: inline-block; width: 40px; height: 20px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #444; transition: .4s; border-radius: 20px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 16px; width: 16px; left: 2px; bottom: 2px;
-            background-color: white; transition: .4s; border-radius: 50%;
-        }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
+        /* Nav */
         .nav {
-            position: fixed; bottom: 0; width: 100%; background: var(--bg);
-            border-top: 1px solid var(--border); display: flex;
-            justify-content: space-around; padding: 10px 0; z-index: 100;
+            position: fixed; bottom: 0; width: 100%; display: flex;
+            justify-content: space-around; padding: 12px 0;
+            border-top: 1px solid var(--brd); background: var(--bg);
         }
-        .nav-item { color: var(--text-dim); font-size: 10px; text-align: center; cursor: pointer; }
-        .nav-item.active { color: var(--accent); }
+        .nav-item { color: var(--dim); font-size: 10px; text-align: center; cursor: pointer; }
+        .nav-item.active { color: var(--acc); }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* Settings */
+        .s-row { 
+            display: flex; justify-content: space-between; padding: 15px; 
+            border-bottom: 1px solid var(--brd); background: var(--card); margin: 8px;
+        }
     </style>
 </head>
-<body>
+<body class="dark">
 
     <div class="header">
-        <div style="font-weight:700; color:var(--accent)">VERTEX_HL</div>
-        <div id="ton-connect"></div> </div>
+        <select class="asset-select" onchange="changeAsset(this.value)">
+            <option value="BTCUSDT">BTC/USDT</option>
+            <option value="ETHUSDT">ETH/USDT</option>
+            <option value="SOLUSDT">SOL/USDT</option>
+            <option value="TONUSDT">TON/USDT</option>
+        </select>
+        <div id="ton-connect"></div>
+    </div>
 
     <div id="trade" class="page active">
-        <div id="tradingview_widget"></div>
-        <div style="padding: 16px;">
-            <button class="hl-btn" onclick="tg.showAlert('Order Executed (Demo)')">BUY / LONG</button>
-            <button class="hl-btn" style="background:var(--red)" onclick="tg.showAlert('Order Executed (Demo)')">SELL / SHORT</button>
+        <div id="tv_chart"></div>
+        
+        <div class="orderbook">
+            <div class="ob-side">
+                <div style="color:var(--red); margin-bottom:5px">SELL ORDERS</div>
+                <div id="asks"></div>
+            </div>
+            <div class="ob-side">
+                <div style="color:var(--acc); margin-bottom:5px">BUY ORDERS</div>
+                <div id="bids"></div>
+            </div>
         </div>
+
+        <div class="btn-group">
+            <button class="hl-btn" style="background:var(--acc)" onclick="trade('BUY')">LONG</button>
+            <button class="hl-btn" style="background:var(--red); color:white" onclick="trade('SELL')">SHORT</button>
+        </div>
+    </div>
+
+    <div id="portfolio" class="page">
+        <div style="padding:20px; text-align:center">
+            <div style="color:var(--dim)">ESTIMATED BALANCE</div>
+            <div style="font-size:24px; font-weight:bold; margin:10px 0">$1,240.55</div>
+            <div style="color:var(--acc)">+2.45% (24h)</div>
+        </div>
+        <div class="s-row"><span>Margin Usage</span><span>0%</span></div>
+        <div class="s-row"><span>Available</span><span>$1,240.55</span></div>
     </div>
 
     <div id="settings" class="page">
-        <div style="color:var(--text-dim); padding: 16px 16px 5px 16px; font-size:11px">PREFERENCES</div>
-        
-        <div class="settings-row">
-            <span>Dark Mode</span>
-            <label class="switch">
-                <input type="checkbox" id="theme-toggle" checked onchange="toggleTheme()">
-                <span class="slider"></span>
-            </label>
+        <div class="s-row">
+            <span>Theme: Dark Mode</span>
+            <input type="checkbox" checked onchange="toggleTheme()">
         </div>
-
-        <div class="settings-row" onclick="window.open('https://t.me/твой_ник_саппорта')">
-            <span>Support</span>
-            <span style="color:var(--accent)">→</span>
+        <div class="s-row" onclick="window.open('https://t.me/your_support')">
+            <span>Support Chat</span><span>→</span>
         </div>
-
-        <div class="settings-row">
-            <span>Version</span>
-            <span style="color:var(--text-dim)">2.5.0-BETA</span>
-        </div>
+        <div class="s-row" onclick="tg.close()"><span>Exit Terminal</span></div>
     </div>
 
     <nav class="nav">
-        <div class="nav-item active" onclick="switchTab('trade', this)"><div>📈</div>TRADE</div>
-        <div class="nav-item" onclick="switchTab('settings', this)"><div>⚙️</div>SETTINGS</div>
+        <div class="nav-item active" onclick="tab('trade', this)">📈 TRADE</div>
+        <div class="nav-item" onclick="tab('portfolio', this)">💼 PORTFOLIO</div>
+        <div class="nav-item" onclick="tab('settings', this)">⚙️ SETTINGS</div>
     </nav>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
+        let currentSymbol = "BTCUSDT";
 
-        // Инициализация TON Connect
-        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-            manifestUrl: 'https://raw.githubusercontent.com/ton-connect/demo-dapp-with-react/master/public/tonconnect-manifest.json',
-            buttonRootId: 'ton-connect'
-        });
-
-        // Переключение вкладок
-        function switchTab(id, el) {
+        function tab(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             el.classList.add('active');
         }
 
-        // Переключение темы
-        function toggleTheme() {
-            document.body.classList.toggle('light-theme');
-            const isLight = document.body.classList.contains('light-theme');
-            tg.setHeaderColor(isLight ? '#ffffff' : '#0b0b0b');
-            tg.setBackgroundColor(isLight ? '#ffffff' : '#0b0b0b');
-            
-            // Пересоздаем график с новой темой
-            renderWidget(isLight ? 'light' : 'dark');
-        }
-
-        function renderWidget(theme) {
+        function renderChart(symbol, theme) {
             new TradingView.widget({
-                "autosize": true,
-                "symbol": "BINANCE:BTCUSDT",
-                "interval": "60",
-                "theme": theme,
-                "style": "1",
-                "locale": "ru",
-                "container_id": "tradingview_widget",
-                "hide_top_toolbar": true,
-                "backgroundColor": theme === 'dark' ? "#0b0b0b" : "#ffffff",
-                "gridColor": theme === 'dark' ? "#141414" : "#f0f0f0"
+                "autosize": true, "symbol": "BINANCE:" + symbol,
+                "interval": "60", "theme": theme, "style": "1",
+                "container_id": "tv_chart", "hide_top_toolbar": true,
+                "backgroundColor": theme === 'dark' ? "#0b0b0b" : "#ffffff"
             });
         }
 
-        // Первый запуск графика
-        renderWidget('dark');
+        function changeAsset(val) {
+            currentSymbol = val;
+            const theme = document.body.classList.contains('light') ? 'light' : 'dark';
+            renderChart(val, theme);
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light');
+            const isLight = document.body.classList.contains('light');
+            renderChart(currentSymbol, isLight ? 'light' : 'dark');
+            tg.setHeaderColor(isLight ? '#ffffff' : '#0b0b0b');
+        }
+
+        // Имитация стакана (динамика)
+        function updateOrderbook() {
+            const generateRows = (color) => {
+                let html = '';
+                for(let i=0; i<5; i++) {
+                    html += `<div class="ob-row"><span style="color:${color}">${(Math.random()*100 + 60000).toFixed(1)}</span><span>${(Math.random()).toFixed(3)}</span></div>`;
+                }
+                return html;
+            }
+            document.getElementById('asks').innerHTML = generateRows('var(--red)');
+            document.getElementById('bids').innerHTML = generateRows('var(--acc)');
+        }
+
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://raw.githubusercontent.com/ton-connect/demo-dapp-with-react/master/public/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        });
+
+        function trade(side) {
+            tg.showConfirm(`Confirm ${side} order for ${currentSymbol}?`);
+        }
+
+        renderChart('BTCUSDT', 'dark');
+        setInterval(updateOrderbook, 1000);
     </script>
 </body>
 </html>
