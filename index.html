@@ -7,67 +7,52 @@
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #080808; --card: #121212; --brd: #222;
-            --acc: #00ffa3; --txt: #ffffff; --dim: #808080; --red: #ff3b69;
-        }
-        body.light {
-            --bg: #f5f5f5; --card: #ffffff; --brd: #ddd;
-            --acc: #00a36c; --txt: #111; --dim: #666;
-        }
-        body { background: var(--bg); color: var(--txt); font-family: 'Roboto Mono', monospace; margin: 0; padding: 0; font-size: 14px; overflow: hidden; transition: 0.3s; }
+        :root { --bg: #080808; --card: #121212; --brd: #222; --acc: #00ffa3; --txt: #fff; --dim: #808080; --red: #ff3b69; }
+        body { background: var(--bg); color: var(--txt); font-family: 'Roboto Mono', monospace; margin: 0; padding: 0; font-size: 14px; overflow: hidden; }
         
-        /* Layout */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--brd); background: var(--bg); height: 50px; box-sizing: border-box; }
-        .active-pair-display { color: var(--acc); font-weight: bold; font-size: 16px; }
-        
-        .page { display: none; height: calc(100vh - 120px); overflow-y: auto; padding-bottom: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid var(--brd); height: 60px; box-sizing: border-box; }
+        .page { display: none; height: calc(100vh - 130px); overflow-y: auto; padding-bottom: 20px; }
         .page.active { display: block; }
-
-        /* Navigation */
-        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid var(--brd); background: var(--bg); z-index: 1000; }
-        .nav-item { color: var(--dim); font-size: 10px; font-weight: bold; text-transform: uppercase; cursor: pointer; text-align: center; }
-        .nav-item.active { color: var(--acc); }
-
-        /* Market List (Home) */
-        .search-container { padding: 15px; position: sticky; top: 0; background: var(--bg); z-index: 10; }
-        .hl-input { width: 100%; background: var(--card); border: 1px solid var(--brd); color: var(--txt); padding: 12px; border-radius: 6px; font-family: inherit; box-sizing: border-box; margin-bottom: 10px; }
-        .market-table { width: 100%; border-collapse: collapse; padding: 0 15px; }
-        .market-table tr { border-bottom: 1px solid var(--brd); cursor: pointer; }
-        .market-table td { padding: 15px 10px; }
-
-        /* Trade Section */
-        .tf-bar { display: flex; background: #000; border-bottom: 1px solid var(--brd); overflow-x: auto; padding: 5px; gap: 5px; scrollbar-width: none; }
+        
+        /* Market Table */
+        .market-table { width: 100%; border-collapse: collapse; }
+        .market-table tr { border-bottom: 1px solid #151515; cursor: pointer; transition: 0.2s; }
+        .market-table td { padding: 16px 15px; }
+        
+        /* Trading */
+        .tf-bar { display: flex; background: #000; border-bottom: 1px solid var(--brd); overflow-x: auto; padding: 5px; gap: 5px; }
         .tf-btn { padding: 6px 12px; background: transparent; border: 1px solid transparent; color: var(--dim); font-size: 11px; cursor: pointer; }
         .tf-btn.active { color: var(--acc); border-color: var(--acc); border-radius: 4px; }
-        #tv_chart { width: 100%; height: 300px; border-bottom: 1px solid var(--brd); }
-        .order-box { padding: 15px; background: var(--card); }
+        #tv_chart { width: 100%; height: 280px; border-bottom: 1px solid var(--brd); }
+        
+        .order-form { padding: 15px; background: var(--card); }
         .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 15px; }
-        .hl-btn { padding: 15px; border: none; font-weight: bold; border-radius: 4px; font-size: 14px; text-transform: uppercase; cursor: pointer; }
+        .hl-input { width: 100%; background: #000; border: 1px solid var(--brd); color: var(--acc); padding: 12px; border-radius: 4px; font-family: inherit; box-sizing: border-box; font-size: 14px; }
+        .hl-btn { width: 100%; padding: 16px; border: none; font-weight: bold; border-radius: 4px; font-size: 14px; text-transform: uppercase; cursor: pointer; }
 
         /* Position Card */
-        .pos-card { background: var(--card); border-radius: 6px; padding: 15px; margin: 10px 15px; border-left: 4px solid var(--acc); border: 1px solid var(--brd); border-left-width: 5px; }
+        .pos-card { background: #111; border-radius: 6px; padding: 15px; margin: 10px 15px; border-left: 5px solid var(--acc); border: 1px solid var(--brd); }
 
         /* Portfolio */
         .balance-card { padding: 40px 20px; text-align: center; background: var(--card); margin: 15px; border-radius: 12px; border: 1px solid var(--brd); }
-        .asset-row { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--brd); margin: 0 15px; }
 
-        /* Settings */
-        .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: var(--card); margin: 10px 15px; border-radius: 8px; border: 1px solid var(--brd); }
+        /* Navigation */
+        .nav { position: fixed; bottom: 0; width: 100%; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid var(--brd); background: var(--bg); z-index: 1000; }
+        .nav-item { color: var(--dim); font-size: 10px; font-weight: bold; text-align: center; cursor: pointer; }
+        .nav-item.active { color: var(--acc); }
+        
+        #ton-connect button { background-color: var(--acc) !important; color: #000 !important; font-weight: bold !important; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div class="active-pair-display" id="header-pair">BTC/USDT</div>
+        <div id="header-pair" style="font-weight:bold; color:var(--acc); font-size:18px">BTC/USDT</div>
         <div id="ton-connect"></div>
     </div>
 
     <div id="home" class="page active">
-        <div class="search-container">
-            <input type="text" class="hl-input" placeholder="Search 100+ pairs..." oninput="filterCoins(this.value)">
-        </div>
+        <div style="padding:15px; color:var(--dim); font-size:12px; border-bottom:1px solid var(--brd)">LIVE MARKETS</div>
         <table class="market-table" id="market-list"></table>
     </div>
 
@@ -79,71 +64,80 @@
             <button class="tf-btn" onclick="changeTF('D', this)">1D</button>
         </div>
         <div id="tv_chart"></div>
-        <div class="order-box">
-            <div class="input-row">
-                <input type="number" class="hl-input" id="p-in" placeholder="Price" oninput="calcTotal()">
-                <input type="number" class="hl-input" id="a-in" placeholder="Amount" oninput="calcTotal()">
+        <div class="order-form">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:11px">
+                <span style="color:var(--dim)">Available Balance:</span>
+                <span id="trade-balance" style="color:var(--acc)">0.00 USDT</span>
             </div>
             <div class="input-row">
-                <input type="number" class="hl-input" id="tp-in" placeholder="Take Profit" style="color:var(--acc)">
-                <input type="number" class="hl-input" id="sl-in" placeholder="Stop Loss" style="color:var(--red)">
+                <input type="number" class="hl-input" id="p-in" placeholder="Price">
+                <input type="number" class="hl-input" id="a-in" placeholder="Amount">
             </div>
-            <div id="total-val" style="font-size:12px; color:var(--acc)">Total: 0.00 USDT</div>
-        </div>
-        <div class="btn-group">
-            <button class="hl-btn" style="background:var(--acc); color:#000" onclick="openOrder('LONG')">LONG</button>
-            <button class="hl-btn" style="background:var(--red); color:#fff" onclick="openOrder('SHORT')">SHORT</button>
+            <div class="input-row">
+                <input type="number" class="hl-input" id="tp-in" placeholder="Take Profit" style="border-color:rgba(0,255,163,0.3)">
+                <input type="number" class="hl-input" id="sl-in" placeholder="Stop Loss" style="border-color:rgba(255,59,105,0.3)">
+            </div>
+            <div class="input-row" style="margin-top:10px">
+                <button class="hl-btn" style="background:var(--acc); color:#000" onclick="openPos('LONG')">LONG</button>
+                <button class="hl-btn" style="background:var(--red); color:#fff" onclick="openPos('SHORT')">SHORT</button>
+            </div>
         </div>
         <div id="pos-display"></div>
     </div>
 
     <div id="portfolio" class="page">
         <div class="balance-card">
-            <div style="color:var(--dim); font-size:12px">ESTIMATED BALANCE</div>
-            <div style="font-size:32px; font-weight:bold; margin:10px 0">$2,450.60</div>
-            <div style="color:var(--acc)">+$120.40 (24h)</div>
+            <div style="color:var(--dim); font-size:12px">TOTAL EQUITY</div>
+            <div id="wallet-balance" style="font-size:32px; font-weight:bold; margin:10px 0">$0.00</div>
+            <div id="wallet-status" style="font-size:10px; color:var(--dim)">Connect wallet to see balance</div>
         </div>
-        <div class="asset-row"><span>USDT</span><b>2,100.00</b></div>
-        <div class="asset-row"><span>BTC</span><b>0.0042</b></div>
-        <div class="asset-row"><span>TON</span><b>145.00</b></div>
-    </div>
-
-    <div id="settings" class="page">
-        <div class="settings-row" onclick="document.body.classList.toggle('light')">
-            <span>Switch Theme</span><b>◑</b>
-        </div>
-        <div class="settings-row">
-            <span>Language</span><b>EN</b>
-        </div>
-        <div class="settings-row" style="margin-top:40px; color:var(--red)" onclick="tg.close()">
-            <span>Exit App</span><b>✕</b>
-        </div>
+        <div style="padding:0 20px" id="asset-rows">
+            </div>
     </div>
 
     <nav class="nav">
         <div class="nav-item active" onclick="switchTab('home', this)">🏠<br>Home</div>
         <div class="nav-item" onclick="switchTab('trade', this)">📈<br>Trade</div>
         <div class="nav-item" onclick="switchTab('portfolio', this)">💼<br>Wallet</div>
-        <div class="nav-item" onclick="switchTab('settings', this)">⚙️<br>Settings</div>
     </nav>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         let tg = window.Telegram.WebApp; tg.expand();
-        let currentSym = "BTCUSDT", pnlInt;
+        let currentSym = "BTCUSDT", currentTF = "60", userBalance = 0.00, pnlInt;
+        const coins = ["BTC", "ETH", "SOL", "TON", "NOT", "DOGE", "XRP", "BNB"];
 
+        // 1. Кошелек и Баланс
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://ton-connect.github.io/demo-dapp-with-react/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
         });
 
+        tonConnectUI.onStatusChange(wallet => {
+            if (wallet) {
+                userBalance = 2450.75; // Симуляция баланса
+                document.getElementById('wallet-status').innerText = "Connected: " + wallet.account.address.slice(0,6) + "...";
+            } else {
+                userBalance = 0.00;
+                document.getElementById('wallet-status').innerText = "Connect wallet to see balance";
+            }
+            updateUIBalances();
+        });
+
+        function updateUIBalances() {
+            document.getElementById('wallet-balance').innerText = `$${userBalance.toFixed(2)}`;
+            document.getElementById('trade-balance').innerText = `${userBalance.toFixed(2)} USDT`;
+        }
+
+        // 2. Навигация
         function switchTab(id, el) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(id).classList.add('active'); el.classList.add('active');
-            if(id === 'trade') initChart(currentSym, '60');
+            if(id === 'trade') initChart(currentSym, currentTF);
         }
 
+        // 3. График
         function initChart(s, t) {
             new TradingView.widget({
                 "autosize": true, "symbol": "BINANCE:"+s, "interval": t, "theme": "dark",
@@ -152,71 +146,78 @@
         }
 
         function changeTF(t, el) {
+            currentTF = t;
             document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
             el.classList.add('active'); initChart(currentSym, t);
         }
 
-        function calcTotal() {
-            let p = document.getElementById('p-in').value || 0;
-            let a = document.getElementById('a-in').value || 0;
-            document.getElementById('total-val').innerText = `Total: ${(p*a).toFixed(2)} USDT`;
+        // 4. WebSocket (Реальные цены)
+        function connectWS() {
+            const streams = coins.map(c => (c.toLowerCase() === 'ton' ? 'tonusdt' : c.toLowerCase()+'usdt') + '@ticker').join('/');
+            const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streams}`);
+            ws.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                const sym = data.s.replace('USDT','');
+                const price = parseFloat(data.c).toFixed(2);
+                const change = parseFloat(data.P).toFixed(2);
+                const row = document.getElementById(`row-${sym}`);
+                if(row) {
+                    row.querySelector('.p').innerText = `$${price}`;
+                    row.querySelector('.c').innerText = `${change}%`;
+                    row.querySelector('.c').style.color = change >= 0 ? 'var(--acc)' : 'var(--red)';
+                }
+            };
         }
 
-        function openOrder(side) {
-            let p = document.getElementById('p-in').value;
-            let a = document.getElementById('a-in').value;
-            if(!p || !a) return tg.showAlert("Fill fields!");
-            
-            document.getElementById('pos-display').innerHTML = `
-                <div class="pos-card" id="active-pos" style="border-left-color: ${side==='LONG'?'var(--acc)':'var(--red)'}">
-                    <div style="display:flex; justify-content:space-between">
-                        <b>${side} ${a} ${currentSym.replace('USDT','')}</b>
-                        <div style="text-align:right">
-                            <div id="pnl-pct" style="font-size:18px; font-weight:bold; color:var(--acc)">+0.00%</div>
-                        </div>
-                    </div>
-                    <div style="font-size:11px; color:var(--dim); margin-top:8px">Entry: ${p} | TP: ${document.getElementById('tp-in').value || '-'}</div>
-                    <button onclick="this.parentElement.remove()" style="width:100%; margin-top:10px; background:#222; border:none; color:#fff; padding:6px; border-radius:4px">CLOSE</button>
-                </div>
-            `;
-            startPNL(p*a);
-            tg.HapticFeedback.notificationOccurred('success');
-        }
-
-        function startPNL(v) {
-            if(pnlInt) clearInterval(pnlInt);
-            pnlInt = setInterval(() => {
-                const el = document.getElementById('pnl-pct');
-                if(!el) return;
-                const r = (Math.random() * 4 - 1.5).toFixed(2);
-                el.innerText = (r > 0 ? '+' : '') + r + '%';
-                el.style.color = r > 0 ? 'var(--acc)' : 'var(--red)';
-            }, 2000);
-        }
-
-        const coins = ["BTC","ETH","SOL","TON","NOT","XRP","ADA","DOGE","AVAX","DOT","LINK","TRX","MATIC","LTC","NEAR","APT","ARB","OP","TIA","SUI","STX","FIL","LDO","INJ","FET","PEPE","WIF","BONK","JUP","STRK","NOT"];
-
-        function loadMarkets() {
+        function loadHome() {
             const list = document.getElementById('market-list');
             coins.forEach(c => {
-                const ch = (Math.random()*10 - 5).toFixed(2);
                 const row = document.createElement('tr');
+                row.id = `row-${c}`;
                 row.onclick = () => {
                     currentSym = c + "USDT";
                     document.getElementById('header-pair').innerText = c + "/USDT";
                     switchTab('trade', document.querySelectorAll('.nav-item')[1]);
                 };
-                row.innerHTML = `<td><b>${c}</b>/USDT</td><td>$${(Math.random()*500).toFixed(2)}</td><td style="color:${ch>0?'var(--acc)':'var(--red)'}">${ch}%</td>`;
+                row.innerHTML = `<td><b>${c}</b>/USDT</td><td class="p" style="text-align:right">$---</td><td class="c" style="text-align:right; width:80px">0.00%</td>`;
                 list.appendChild(row);
             });
         }
 
-        function filterCoins(v) {
-            const rows = document.querySelectorAll('#market-list tr');
-            rows.forEach(r => r.style.display = r.innerText.toUpperCase().includes(v.toUpperCase()) ? '' : 'none');
+        // 5. Трейдинг: Ордера и PNL
+        function openPos(side) {
+            const p = document.getElementById('p-in').value;
+            const a = document.getElementById('a-in').value;
+            if(!p || !a) return tg.showAlert("Заполните цену и объем!");
+
+            document.getElementById('pos-display').innerHTML = `
+                <div class="pos-card" id="active-pos" style="border-left-color: ${side==='LONG'?'var(--acc)':'var(--red)'}">
+                    <div style="display:flex; justify-content:space-between">
+                        <b>${side} ${a} ${currentSym.replace('USDT','')}</b>
+                        <div id="pnl-pct" style="font-size:18px; font-weight:bold; color:var(--acc)">+0.00%</div>
+                    </div>
+                    <div style="font-size:11px; color:var(--dim); margin-top:5px">Entry: ${p} | TP: ${document.getElementById('tp-in').value || '-'}</div>
+                    <button onclick="this.parentElement.remove()" style="width:100%; margin-top:10px; background:#222; border:none; color:#fff; padding:8px; border-radius:4px">CLOSE</button>
+                </div>
+            `;
+            startPNL();
+            tg.HapticFeedback.notificationOccurred('success');
         }
 
-        loadMarkets();
+        function startPNL() {
+            if(pnlInt) clearInterval(pnlInt);
+            pnlInt = setInterval(() => {
+                const el = document.getElementById('pnl-pct');
+                if(!el) return clearInterval(pnlInt);
+                const rnd = (Math.random() * 5 - 2).toFixed(2);
+                el.innerText = (rnd > 0 ? '+' : '') + rnd + '%';
+                el.style.color = rnd > 0 ? 'var(--acc)' : 'var(--red)';
+            }, 2000);
+        }
+
+        loadHome();
+        connectWS();
+        updateUIBalances();
     </script>
 </body>
 </html>
