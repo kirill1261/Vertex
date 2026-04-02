@@ -1,30 +1,119 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
-        body { background-color: #000; color: #00ff00; font-family: monospace; text-align: center; }
-        .card { border: 1px solid #00ff00; padding: 20px; margin: 10px; border-radius: 10px; }
-        button { background: #00ff00; color: #000; border: none; padding: 15px; width: 80%; font-weight: bold; border-radius: 5px; }
-        .price { font-size: 24px; color: #fff; }
+        :root { --main-color: #00ff00; --bg-color: #050505; --card-bg: #121212; }
+        body { background-color: var(--bg-color); color: white; font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 70px; }
+        .header { padding: 15px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        
+        /* Вкладки */
+        .tab-content { display: none; padding: 15px; animation: fadeIn 0.3s; }
+        .active { display: block; }
+
+        /* Курсы */
+        .crypto-row { display: flex; justify-content: space-between; padding: 15px; background: var(--card-bg); margin-bottom: 8px; border-radius: 8px; }
+        .price-up { color: var(--main-color); }
+
+        /* Нижнее меню */
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #111; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #333; }
+        .nav-item { color: #888; font-size: 12px; text-decoration: none; text-align: center; }
+        .nav-item.active-nav { color: var(--main-color); }
+
+        /* Плашка подписки */
+        .premium-lock { text-align: center; margin-top: 50px; }
+        .btn-pay { background: var(--main-color); color: black; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
-    <h1>VERTEX TERMINAL</h1>
-    <div class="card">
-        <p>BTC/USDT</p>
-        <div class="price" id="btc-price">Загрузка...</div>
+
+    <div class="header">
+        <span style="color: var(--main-color); font-weight: bold;">VERTEX AI</span>
+        <div id="ton-connect"></div> </div>
+
+    <div id="market" class="tab-content active">
+        <h3>Рынок</h3>
+        <div id="prices-list">Загрузка котировок...</div>
     </div>
-    <button onclick="sendSignal()">ПОЛУЧИТЬ ИИ-ПРОГНОЗ</button>
+
+    <div id="trade" class="tab-content">
+        <h3>Торговля</h3>
+        <div class="crypto-row">
+            <span>BTC/USDT</span>
+            <button class="btn-pay" style="padding: 5px 10px;">LONG</button>
+        </div>
+        <p style="color: #666; font-size: 14px;">Торговый модуль подключается к вашему API Bybit...</p>
+    </div>
+
+    <div id="ai" class="tab-content">
+        <div class="premium-lock">
+            <h2>💎 Доступ ограничен</h2>
+            <p>ИИ-прогнозы доступны только пользователям с Premium подпиской.</p>
+            <button class="btn-pay" onclick="requestSubscription()">Купить подписку</button>
+        </div>
+    </div>
+
+    <div id="settings" class="tab-content">
+        <h3>Настройки</h3>
+        <p>ID: <span id="user-id">...</span></p>
+        <p>Версия: 2.0.1 Stable</p>
+    </div>
+
+    <nav class="nav-bar">
+        <div class="nav-item active-nav" onclick="showTab('market', this)">📊 Рынок</div>
+        <div class="nav-item" onclick="showTab('trade', this)">🔄 Торги</div>
+        <div class="nav-item" onclick="showTab('ai', this)">🤖 ИИ</div>
+        <div class="nav-item" onclick="showTab('settings', this)">⚙️ Настройки</div>
+    </nav>
 
     <script>
         let tg = window.Telegram.WebApp;
-        tg.expand(); // Развернуть на весь экран
+        tg.expand();
 
-        function sendSignal() {
-            tg.sendData("get_ai_signal"); // Отправляет команду боту
-            tg.close();
+        // Подключение кошелька TON
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://raw.githubusercontent.com/ton-connect/demo-dapp-with-react/master/public/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        });
+
+        // Переключение вкладок
+        function showTab(tabId, el) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active-nav'));
+            document.getElementById(tabId).classList.add('active');
+            el.classList.add('active-nav');
         }
+
+        // Получение реальных курсов
+        async function fetchPrices() {
+            try {
+                const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbols=["BTCUSDT","ETHUSDT","TONUSDT"]');
+                const data = await res.json();
+                let html = '';
+                data.forEach(coin => {
+                    html += `<div class="crypto-row">
+                        <span>${coin.symbol}</span>
+                        <span class="price-up">$${parseFloat(coin.price).toFixed(2)}</span>
+                    </div>`;
+                });
+                document.getElementById('prices-list').innerHTML = html;
+            } catch (e) {
+                console.error("Ошибка курсов");
+            }
+        }
+
+        function requestSubscription() {
+            tg.sendData("buy_premium"); // Отправляем боту запрос на покупку
+        }
+
+        setInterval(fetchPrices, 3000); // Обновлять курсы каждые 3 сек
+        fetchPrices();
+        document.getElementById('user-id').innerText = tg.initDataUnsafe.user?.id || 'Неизвестен';
     </script>
 </body>
 </html>
